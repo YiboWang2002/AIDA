@@ -2,15 +2,141 @@
 
 *From Multimodal Depression Assessment to Feedback-Guided Intervention in Brief Dialogues*
 
-DepRePlan selects a cognitive behavioral therapy (CBT) technique, plans a first action, and turns that plan into a reply. When the user identifies an obstacle, the planner keeps the technique and revises the action. In the example below, the user finds it hard to reconstruct an entire incident. The revised plan asks for one detail they can recall.
+A user who says *choosing is the hard part* gives a counselor a reason to change the next step. DepRePlan makes that decision explicit. A planner selects a cognitive behavioral therapy (CBT) technique and proposes an action. After hearing the user's response, it revises the plan under the same technique, and a dialogue model puts the revised action into words.
+
+[Main results](#paper-results) · [Framework](#how-depreplan-works) · [DepGuide](#the-depguide-benchmark) · [Example dialogue](#an-example-dialogue) · [Paired analyses](#what-changes-after-feedback) · [Run a dialogue](#run-a-dialogue) · [Train](#train)
+
+## Paper results
+
+### Intervention quality on DepGuide
+
+**DepRePlan scored 5.275/6 across 200 test scenarios, ranking third among ten systems.** Its Qwen3.5-9B backbone scored 4.480/6 under direct generation. The paired gain was **0.795 points** (95% CI [0.566, 1.030]). The largest difference was in action feasibility, which rose from 1.375 to 1.680 out of 2.
+
+**Table III. Two-reply intervention quality.** Each system receives the same opening. GPT-6 Luna simulates the user's feedback in response to that system's first reply and scores the completed exchange in a separate call with system identities hidden. Each dimension ranges from 0 to 2 and the total from 0 to 6. Bold scores mark the column maxima.
+
+| Method | Goal fit ↑ | Action feasibility ↑ | Feedback adaptation ↑ | Total ↑ |
+| --- | :---: | :---: | :---: | :---: |
+| [CBT-LLM](https://aclanthology.org/2024.lrec-main.261/) | 0.737 | 0.490 | 0.323 | 1.551 |
+| [CAMEL-LLAMA3](https://aclanthology.org/2024.findings-emnlp.832/) | 1.080 | 0.920 | 1.025 | 3.025 |
+| [Qwen-Max](https://help.aliyun.com/en/model-studio/qwen-max) | 1.565 | 1.305 | 1.490 | 4.360 |
+| [Qwen3.5-9B](https://huggingface.co/Qwen/Qwen3.5-9B) | 1.510 | 1.375 | 1.595 | 4.480 |
+| [Gemini-3.5-Flash](https://deepmind.google/models/model-cards/gemini-3-5-flash/) | 1.680 | 1.575 | 1.800 | 5.055 |
+| [GLM-5.3-Flash](https://huggingface.co/zai-org/GLM-5.3-Flash) | 1.730 | 1.585 | 1.740 | 5.055 |
+| [DeepSeek-V4-Flash](https://arxiv.org/abs/2606.19348) | 1.750 | 1.620 | 1.755 | 5.125 |
+| [Grok-4.6](https://x.ai/news/grok-4-6) | 1.825 | **1.775** | 1.865 | 5.465 |
+| [GPT-5.5](https://openai.com/index/gpt-5-5-system-card/) | **1.920** | 1.730 | **1.905** | **5.555** |
+| **DepRePlan (Ours)** | 1.810 | 1.680 | 1.785 | 5.275 |
 
 <p align="center">
-  <img src="assets/feedback-guided-revision.png" width="100%" alt="Under the same CBT technique, the planner changes a request to reconstruct an incident into a question about one detail the user remembers.">
+  <a href="assets/intervention-profiles.png"><img src="assets/intervention-profiles.png" width="1000" alt="Ten systems compared by mean two-reply score, with 95% confidence intervals. A second panel compares feedback adaptation across five user intents."></a>
 </p>
 
-*Figure 2(b) from the paper. The feedback changes what the system asks the user to do next.*
+*Figure 4. The bars show total scores with 95% confidence intervals. The right panel separates five kinds of user feedback. DepRePlan scored higher than its backbone in all five. When users requested an explanation (46 scenarios), feedback adaptation averaged 1.870/2 for DepRePlan and 1.435/2 for the backbone.*
 
-[Run a dialogue](#run-a-dialogue) · [Estimate a PHQ-8 total](#estimate-a-phq-8-total) · [Train](#train) · [Evaluate on DepGuide](#evaluate-on-depguide) · [Paper results](#paper-results)
+### PHQ-8 prediction on DAIC-WOZ
+
+**Table II. Depression severity estimation on the 47 official test interviews.** DepRePlan combines participant speech transcripts, acoustic descriptors, and facial measurements to estimate one PHQ-8 total per interview. MAE and RMSE are measured in PHQ-8 points before clipping. NR indicates that the comparison did not report an RMSE.
+
+| Method | Input | MAE ↓ | RMSE ↓ |
+| --- | --- | :---: | :---: |
+| [SVM](https://doi.org/10.1016/j.jad.2021.09.001) | Text, audio, visual | 3.98 | 5.11 |
+| [Topic](https://doi.org/10.1145/3133944.3133945) | Text, audio, visual | 3.96 | 4.99 |
+| [RF](https://doi.org/10.1145/3133944.3133951) | Text | 3.87 | 4.98 |
+| [Dual encoder](https://doi.org/10.3389/fpsyt.2023.1160291) | Text | 3.80 | 4.67 |
+| [Symptom Prediction](https://doi.org/10.1186/s40708-023-00185-9) | Text | 3.78 | NR |
+| [MeBERT+ALL](https://aclanthology.org/2024.clinicalnlp-1.28/) | Text and lexicons | 3.59 | NR |
+| [Agarwal et al.](https://aclanthology.org/2024.lrec-main.87/) | Text | 3.52 | NR |
+| [LMIQ](https://aclanthology.org/2024.findings-emnlp.23/) | Text | 3.46 | 4.30 |
+| DepRePlan text (Ours) | Text | 3.38 | 4.22 |
+| **DepRePlan (Ours)** | Text, audio, visual | **3.37** | **4.21** |
+
+## How DepRePlan works
+
+**One proposal can elicit different obstacles.** In Figure 1, the same user who has lost a job might feel ready to edit a résumé or might find choosing among tasks overwhelming. The first response supports editing one line. The second calls for the counselor to narrow the choice.
+
+<p align="center">
+  <a href="assets/motivation.png"><img src="assets/motivation.png" width="640" alt="Two responses to job loss. A user who chooses a résumé gets help editing one line. A user who finds the choice difficult gets one job posting to look at."></a>
+</p>
+
+*Figure 1. Two possible reactions to the same opening proposal lead to different next actions.*
+
+**The assessment informs the planner. The user's feedback informs the revision.** The planner can take a PHQ-8 total alongside the opening concern, select one of seven CBT techniques, and write an initial plan. The executor uses the technique, plan, and dialogue history to generate the first reply. After the user responds, the planner receives its previous plan and the updated history. In Figure 2, the request for one detail changes the next question while the technique remains Reality Testing.
+
+<p align="center">
+  <a href="assets/depreplan-framework.png"><img src="assets/depreplan-framework.png" width="1000" alt="Video, audio and text inform an optional assessment. A planner selects a CBT technique and plans the reply. User feedback leads it to revise the plan before the dialogue model responds again."></a>
+</p>
+
+*Figure 2. The upper panel traces assessment, planning, and dialogue. The lower panel shows the actual change to the plan in the illustrated exchange.* [Enlarge the revision panel](assets/feedback-guided-revision.png)
+
+## The DepGuide benchmark
+
+DepGuide is a bilingual benchmark built around a decision trajectory. Each scenario records the opening concern, the selected technique, the initial plan and reply, feedback on that reply, and the revised plan and reply. A trajectory supplies three planning targets and two response targets.
+
+<p align="center">
+  <a href="assets/depguide-trajectory.png"><img src="assets/depguide-trajectory.png" width="1000" alt="A worked DepGuide trajectory links the opening, initial plan and first reply to the user’s difficulty choosing an activity, a revised plan, and the next reply."></a>
+</p>
+
+*Figure 3. In this development example, the user has too little energy to choose between sitting by a window and listening to music. The revised plan removes that choice and offers one optional step.*
+
+**Table I. Benchmark composition.** Scenarios derived from related source records are kept in the same split. The final three rows show how often a synthetic PHQ-8 total is available and how it was constructed.
+
+| DepGuide | Train | Dev. | Test | All |
+| --- | :---: | :---: | :---: | :---: |
+| Scenarios | 994 | 98 | 200 | 1,292 |
+| Source groups | 934 | 90 | 180 | 1,204 |
+| Chinese scenarios | 694 | 68 | 140 | 902 |
+| English scenarios | 300 | 30 | 60 | 390 |
+| **Synthetic PHQ-8 total** |  |  |  |  |
+| From source items | 197 | 19 | 40 | 256 |
+| From new synthetic items | 399 | 40 | 80 | 519 |
+| Unavailable | 398 | 39 | 80 | 517 |
+
+## An example dialogue
+
+After an exam, the speaker wanted comfort from her mother. When the conversation turns to sending her a text, the user says she could do that but does not know how to begin. DepRePlan uses the speaker's own phrasing to suggest an opening line.
+
+<p align="center">
+  <a href="assets/dialogue-case.png"><img src="assets/dialogue-case.png" width="1000" alt="A speaker wants comfort after an exam. When she says she could send a text but does not know how to begin, DepRePlan suggests an opening line using her words."></a>
+</p>
+
+*Figure 5. The opening translates the recorded speech, and the two subsequent user turns are simulated. DepRePlan generated this dialogue without a PHQ-8 score. The displayed 14.6/24 was estimated separately from the translated opening. The repository edition omits identifiable video frames in Figures 2 and 5.*
+
+## What changes after feedback?
+
+### Holding the dialogue history fixed
+
+**Table V. Original versus revised plan on the same 200 test scenarios.** Both candidate replies come from the same executor, with the same first reply, user feedback, CBT technique, and decoding settings. Only the plan changes. An evaluator rates feedback fit and action feasibility for both anonymous replies in both orders. The score for each reply is averaged over presentation orders, and the 95% intervals use 2,000 source-group bootstrap samples.
+
+| Metric | Original plan | Revised plan | Paired gain | 95% CI |
+| --- | :---: | :---: | :---: | :---: |
+| Feedback fit ↑ | 1.5475 | **1.7300** | +0.1825 | [0.078, 0.287] |
+| Action feasibility ↑ | 1.5550 | **1.7050** | +0.1500 | [0.059, 0.241] |
+| Total ↑ | 3.1025 | **3.4350** | +0.3325 | [0.147, 0.522] |
+
+<p align="center">
+  <a href="assets/paired-score-differences.png"><img src="assets/paired-score-differences.png" width="585" alt="Distribution of 200 paired score differences for the same user feedback. The revised plan scores higher in 90 cases, equally in 50 and lower in 60."></a>
+</p>
+
+*Figure 6. Each observation is the revised-plan score minus the original-plan score for one scenario. The revised plan scored higher in 90 scenarios, equally in 50, and lower in 60.*
+
+### Expert review of the full exchange
+
+**Table IV. One blinded expert rated the first 60 pairs of complete dialogues in the randomized test order.** The expert gave DepRePlan the higher total in 46 pairs, equal totals in nine, and the lower total in five. The largest difference was in feedback adaptation. Each dimension is scored from 0 to 2 and the total from 0 to 6.
+
+| Method | Goal fit ↑ | Action feasibility ↑ | Feedback adaptation ↑ | Total ↑ |
+| --- | :---: | :---: | :---: | :---: |
+| Qwen3.5-9B | 1.350 | 1.350 | 1.067 | 3.767 |
+| **DepRePlan (Ours)** | **1.900** | **1.900** | **1.800** | **5.600** |
+
+### Contributions of the planner and executor
+
+**Table VI. Three configurations on the same 200 complete exchanges.** Giving the backbone a trained planner increased the mean total by 0.390/6. Training the executor added another 0.405/6. The two middle columns distinguish the 120 scenarios with a synthetic PHQ-8 total from the 80 without one. Paired gains and confidence intervals compare consecutive rows on all 200 scenarios.
+
+| Configuration | All ↑ | With PHQ-8 ↑ | Without PHQ-8 ↑ | Paired gain | 95% CI |
+| --- | :---: | :---: | :---: | :---: | :---: |
+| Qwen3.5-9B | 4.480 | 4.308 | 4.738 | Reference |  |
+| Planner + backbone | 4.870 | 5.008 | 4.663 | +0.390 | [0.153, 0.597] |
+| **DepRePlan (Ours)** | **5.275** | **5.292** | **5.250** | +0.405 | [0.193, 0.629] |
 
 ## Run a dialogue
 
@@ -42,7 +168,7 @@ The first JSON record contains `technique`, `plan`, and `reply`. At the prompt, 
 
 The optional assessment module predicts one continuous total per interview. It aligns participant turns with acoustic and facial descriptors, encodes the transcript with frozen MPNet, and pools the resulting sequence with a bidirectional GRU and attention. A separately trained text regressor handles interviews with no observed acoustic or visual features. The text encoder is [all-mpnet-base-v2](https://huggingface.co/sentence-transformers/all-mpnet-base-v2).
 
-With a DAIC-WOZ participant archive and the two trained regression checkpoints, run:
+The following commands take a DAIC-WOZ participant archive and the two trained regression checkpoints.
 
 ```bash
 python -m assessment.prepare --interview work/interview.zip --output work/turns.npz
@@ -82,12 +208,10 @@ python -m assessment.train --stage multimodal --train work/train.csv --dev work/
 
 ## Evaluate on DepGuide
 
-DepGuide contains 1,292 Chinese and English decision trajectories, with 994 training, 98 development, and 200 test scenarios. Two paired tasks distinguish what the planner learns from the assessment and what it learns from feedback.
-
 | Paired task | Held fixed | Changed within the scenario |
 | --- | --- | --- |
-| Assessment availability | Opening, background, and decoding settings | The initial planner receives or omits the synthetic PHQ-8 total. |
-| Plan revision | First reply, actual feedback, CBT technique, executor, and decoding settings | The executor follows the original or the revised plan. |
+| Assessment availability | Opening, background, and decoding settings | On the 59 development scenarios with a synthetic total, the initial planner receives or omits that total. |
+| Plan revision | First reply, user feedback, CBT technique, executor, and decoding settings | On the 200 test scenarios, the executor follows either the original plan or its revision. |
 
 To generate both next replies from a single dialogue, add `--compare-plans` to the dialogue command and provide feedback. The second JSON record contains `history`, `original_plan`, `original_reply`, `revised_plan`, and `revised_reply`. Pass the shared history and both replies to `evaluation.prompts.revision_prompts` to construct the two anonymous presentations.
 
@@ -97,29 +221,3 @@ The paper uses GPT-6 Luna in separate calls for user simulation and assessment. 
 python evaluation/score.py dialogue work/dialogue-scores.jsonl --baseline backbone --method depreplan
 python evaluation/score.py revision work/revision-scores.jsonl
 ```
-
-## Paper results
-
-**Two-reply intervention quality.** On the same 200 DepGuide scenarios, adding a planner increases the total by 0.390 points. Training the executor contributes another 0.405. The total combines goal fit, action feasibility, and feedback adaptation, each scored from 0 to 2. Values are from Table VI.
-
-| Configuration | Mean total ↑ (0–6) | Gain over preceding configuration | Paired 95% CI |
-| --- | ---: | ---: | ---: |
-| Qwen3.5-9B, direct generation | 4.480 | | |
-| DepRePlan planner + backbone executor | 4.870 | +0.390 | [0.153, 0.597] |
-| DepRePlan planner + trained executor | **5.275** | +0.405 | [0.193, 0.629] |
-
-**What changes when the executor already knows the feedback?** Table V holds the dialogue history and executor fixed. Replacing the original plan increases both feedback fit and action feasibility. The estimates average the two presentation orders within each scenario. Confidence intervals use 2,000 bootstrap samples drawn at the source-group level.
-
-| Next-reply score | Original plan | Revised plan | Paired gain | 95% CI |
-| --- | ---: | ---: | ---: | ---: |
-| Feedback fit ↑ (0–2) | 1.5475 | 1.7300 | +0.1825 | [0.078, 0.287] |
-| Action feasibility ↑ (0–2) | 1.5550 | 1.7050 | +0.1500 | [0.059, 0.241] |
-| Total ↑ (0–4) | 3.1025 | **3.4350** | **+0.3325** | **[0.147, 0.522]** |
-
-<p align="center">
-  <img src="assets/paired-score-differences.png" width="540" alt="Distribution of 200 paired score differences. Revised plans score higher in 90 scenarios, equally in 50, and lower in 60.">
-</p>
-
-*Figure 6 from the paper. Each difference is the score under the revised plan minus the score under the original plan in the same scenario.*
-
-**Interview assessment.** On the 47 official DAIC-WOZ test interviews, the multimodal estimator achieves **3.37 MAE** and **4.21 RMSE** in PHQ-8 points. The text model obtains 3.38 and 4.22 on the same participants (Table II).
