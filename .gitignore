@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.env.*
+work/
+data/
+runs/
+checkpoints/
+*.pt
+*.npz
+*.safetensors
