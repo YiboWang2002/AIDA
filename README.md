@@ -59,13 +59,13 @@ Multimodal interviews can reveal the severity of depressive symptoms. Using that
 
 ## How AIDA works
 
-**One proposal can elicit different obstacles.** In Figure 1, the same user who has lost a job might feel ready to edit a résumé or might find choosing among tasks overwhelming. The first response supports editing one line. The second calls for the counselor to narrow the choice.
+**Returning to drawing.** The user misses drawing, and the assessment points to low energy. AIDA suggests a quick sketch. When the user says a blank page puts them off, AIDA suggests picking up an unfinished drawing. The user then worries about having to finish the whole bird, so AIDA suggests adding one feather and stopping there.
 
 <p align="center">
-  <a href="assets/motivation.png"><img src="assets/motivation.png" width="640" alt="Two responses to job loss. A user who chooses a résumé gets help editing one line. A user who finds the choice difficult gets one job posting to look at."></a>
+  <a href="assets/motivation.png"><img src="assets/motivation.png" width="640" alt="A teal arrow leads from the low-energy assessment to an initial plan. Gray arrows link model replies and user feedback, and an orange arrow carries the revised plan into the next turn. In the example, the model suggests returning to an unfinished bird and stopping after one feather."></a>
 </p>
 
-*Figure 1. Two possible reactions to the same opening proposal lead to different next actions.*
+*Figure 1. A PHQ-8 cue of low energy motivates one quick sketch. A daunting blank page shifts the starting point to an unfinished bird. When the user feels obliged to finish it, the planner suggests stopping after one feather.*
 
 **The assessment informs the planner. The user's feedback informs the revision.** The planner can take a PHQ-8 total alongside the opening concern, select one of seven CBT techniques, and write an initial plan. The executor uses the technique, plan, and dialogue history to generate the first reply. After the user responds, the planner receives its previous plan and the updated history. In Figure 2, the request for one detail changes the next question while the technique remains Reality Testing.
 
