@@ -1,16 +1,23 @@
-# DepRePlan
+# AIDA
 
-*From Multimodal Depression Assessment to Feedback-Guided Intervention in Brief Dialogues*
+*From Multimodal Depression Assessment to Feedback-Guided Intervention*
 
-A user who says *choosing is the hard part* gives a counselor a reason to change the next step. DepRePlan makes that decision explicit. A planner selects a cognitive behavioral therapy (CBT) technique and proposes an action. After hearing the user's response, it revises the plan under the same technique, and a dialogue model puts the revised action into words.
+**Assessment-Informed Dialogue Adaptation (AIDA)** connects multimodal depression assessment to a concrete intervention plan. When a user explains why a proposed step is difficult, the planner revises that step within the selected CBT technique.
 
-[Main results](#paper-results) · [Framework](#how-depreplan-works) · [DepGuide](#the-depguide-benchmark) · [Example dialogue](#an-example-dialogue) · [Paired analyses](#what-changes-after-feedback) · [Run a dialogue](#run-a-dialogue) · [Train](#train)
+<details>
+<summary>Paper abstract</summary>
+
+Multimodal interviews can reveal the severity of depressive symptoms. Using that assessment to guide psychological intervention requires choosing a first step that fits the person’s goals and adapting it when they explain what makes it difficult. We introduce Assessment-Informed Dialogue Adaptation (AIDA), a closed-loop framework that connects multimodal depression assessment to intervention through an explicit, revisable plan. AIDA estimates the severity of depressive symptoms from facial, acoustic, and linguistic cues. Its planner uses the user’s concern, goal, readiness to act, and available severity estimate to select a cognitive behavioral therapy (CBT) technique and specify an action. A dialogue model proposes that action. When the user reports an obstacle, the planner adjusts the focus or difficulty of the exercise within the same technique, guiding the model’s next reply. We also introduce DepGuide, a bilingual dataset and interactive benchmark comprising 1,292 decision trajectories. Each trajectory records the plans and replies before and after user feedback, providing supervision for planning, execution, and revision. Paired comparisons test how access to a severity score influences the initial plan and how revising that plan changes the next action. On the Wizard-of-Oz subset of the Distress Analysis Interview Corpus (DAIC-WOZ), AIDA predicts eight-item Patient Health Questionnaire (PHQ-8) scores with a mean absolute error (MAE) of 3.37 points. In automated evaluation on 200 DepGuide test scenarios, it scores 5.275 out of 6 for intervention quality across two replies, compared with 4.480 for its Qwen3.5-9B backbone. Even when the dialogue model receives the same history and user feedback, using the revised plan improves the combined score for feedback fit and action feasibility by 0.333 points out of 4. Code is available at [the AIDA repository](https://github.com/YiboWang2002/AIDA).
+
+</details>
+
+[Main results](#paper-results) · [Framework](#how-aida-works) · [DepGuide](#the-depguide-benchmark) · [Example dialogue](#an-example-dialogue) · [Paired analyses](#what-changes-after-feedback) · [Run a dialogue](#run-a-dialogue) · [Train](#train)
 
 ## Paper results
 
 ### Intervention quality on DepGuide
 
-**DepRePlan scored 5.275/6 across 200 test scenarios, ranking third among ten systems.** Its Qwen3.5-9B backbone scored 4.480/6 under direct generation. The paired gain was **0.795 points** (95% CI [0.566, 1.030]). The largest difference was in action feasibility, which rose from 1.375 to 1.680 out of 2.
+**AIDA scored 5.275/6 across 200 test scenarios, ranking third among ten systems.** Its Qwen3.5-9B backbone scored 4.480/6 under direct generation. The paired gain was **0.795 points** (95% CI [0.566, 1.030]). The largest difference was in action feasibility, which rose from 1.375 to 1.680 out of 2.
 
 **Table III. Two-reply intervention quality.** Each system receives the same opening. GPT-6 Luna simulates the user's feedback in response to that system's first reply and scores the completed exchange in a separate call with system identities hidden. Each dimension ranges from 0 to 2 and the total from 0 to 6. Bold scores mark the column maxima.
 
@@ -25,17 +32,17 @@ A user who says *choosing is the hard part* gives a counselor a reason to change
 | [DeepSeek-V4-Flash](https://arxiv.org/abs/2606.19348) | 1.750 | 1.620 | 1.755 | 5.125 |
 | [Grok-4.6](https://x.ai/news/grok-4-6) | 1.825 | **1.775** | 1.865 | 5.465 |
 | [GPT-5.5](https://openai.com/index/gpt-5-5-system-card/) | **1.920** | 1.730 | **1.905** | **5.555** |
-| **DepRePlan (Ours)** | 1.810 | 1.680 | 1.785 | 5.275 |
+| **AIDA (Ours)** | 1.810 | 1.680 | 1.785 | 5.275 |
 
 <p align="center">
   <a href="assets/intervention-profiles.png"><img src="assets/intervention-profiles.png" width="1000" alt="Ten systems compared by mean two-reply score, with 95% confidence intervals. A second panel compares feedback adaptation across five user intents."></a>
 </p>
 
-*Figure 4. The bars show total scores with 95% confidence intervals. The right panel separates five kinds of user feedback. DepRePlan scored higher than its backbone in all five. When users requested an explanation (46 scenarios), feedback adaptation averaged 1.870/2 for DepRePlan and 1.435/2 for the backbone.*
+*Figure 4. The bars show total scores with 95% confidence intervals. The right panel separates five kinds of user feedback. AIDA scored higher than its backbone in all five. When users requested an explanation (46 scenarios), feedback adaptation averaged 1.870/2 for AIDA and 1.435/2 for the backbone.*
 
 ### PHQ-8 prediction on DAIC-WOZ
 
-**Table II. Depression severity estimation on the 47 official test interviews.** DepRePlan combines participant speech transcripts, acoustic descriptors, and facial measurements to estimate one PHQ-8 total per interview. MAE and RMSE are measured in PHQ-8 points before clipping. NR indicates that the comparison did not report an RMSE.
+**Table II. Depression severity estimation on the 47 official test interviews.** AIDA combines participant speech transcripts, acoustic descriptors, and facial measurements to estimate one PHQ-8 total per interview. MAE and RMSE are measured in PHQ-8 points before clipping. NR indicates that the comparison did not report an RMSE.
 
 | Method | Input | MAE ↓ | RMSE ↓ |
 | --- | --- | :---: | :---: |
@@ -47,10 +54,10 @@ A user who says *choosing is the hard part* gives a counselor a reason to change
 | [MeBERT+ALL](https://aclanthology.org/2024.clinicalnlp-1.28/) | Text and lexicons | 3.59 | NR |
 | [Agarwal et al.](https://aclanthology.org/2024.lrec-main.87/) | Text | 3.52 | NR |
 | [LMIQ](https://aclanthology.org/2024.findings-emnlp.23/) | Text | 3.46 | 4.30 |
-| DepRePlan text (Ours) | Text | 3.38 | 4.22 |
-| **DepRePlan (Ours)** | Text, audio, visual | **3.37** | **4.21** |
+| AIDA text (Ours) | Text | 3.38 | 4.22 |
+| **AIDA (Ours)** | Text, audio, visual | **3.37** | **4.21** |
 
-## How DepRePlan works
+## How AIDA works
 
 **One proposal can elicit different obstacles.** In Figure 1, the same user who has lost a job might feel ready to edit a résumé or might find choosing among tasks overwhelming. The first response supports editing one line. The second calls for the counselor to narrow the choice.
 
@@ -93,13 +100,15 @@ DepGuide is a bilingual benchmark built around a decision trajectory. Each scena
 
 ## An example dialogue
 
-After an exam, the speaker wanted comfort from her mother. When the conversation turns to sending her a text, the user says she could do that but does not know how to begin. DepRePlan uses the speaker's own phrasing to suggest an opening line.
+After an exam, the speaker wanted comfort from her mother. When the conversation turns to sending her a text, the user says she could do that but does not know how to begin. AIDA uses the speaker's own phrasing to suggest an opening line.
 
 <p align="center">
-  <a href="assets/dialogue-case.png"><img src="assets/dialogue-case.png" width="1000" alt="A speaker wants comfort after an exam. When she says she could send a text but does not know how to begin, DepRePlan suggests an opening line using her words."></a>
+  <a href="assets/dialogue-case.png"><img src="assets/dialogue-case.png" width="1000" alt="A speaker wants comfort after an exam. When she says she could send a text but does not know how to begin, AIDA suggests an opening line using her words."></a>
 </p>
 
-*Figure 5. The opening translates the recorded speech, and the two subsequent user turns are simulated. DepRePlan generated this dialogue without a PHQ-8 score. The displayed 14.6/24 was estimated separately from the translated opening. The repository edition omits identifiable video frames in Figures 2 and 5.*
+*Figure 5. Seeking comfort after an exam. The opening translates the recorded speech, and the two later user turns are simulated.*
+
+The repository edition omits identifiable video frames in Figures 2 and 5.
 
 ## What changes after feedback?
 
@@ -121,12 +130,12 @@ After an exam, the speaker wanted comfort from her mother. When the conversation
 
 ### Expert review of the full exchange
 
-**Table IV. One blinded expert rated the first 60 pairs of complete dialogues in the randomized test order.** The expert gave DepRePlan the higher total in 46 pairs, equal totals in nine, and the lower total in five. The largest difference was in feedback adaptation. Each dimension is scored from 0 to 2 and the total from 0 to 6.
+**Table IV. One blinded expert rated the first 60 pairs of complete dialogues in the randomized test order.** The expert gave AIDA the higher total in 46 pairs, equal totals in nine, and the lower total in five. The largest difference was in feedback adaptation. Each dimension is scored from 0 to 2 and the total from 0 to 6.
 
 | Method | Goal fit ↑ | Action feasibility ↑ | Feedback adaptation ↑ | Total ↑ |
 | --- | :---: | :---: | :---: | :---: |
 | Qwen3.5-9B | 1.350 | 1.350 | 1.067 | 3.767 |
-| **DepRePlan (Ours)** | **1.900** | **1.900** | **1.800** | **5.600** |
+| **AIDA (Ours)** | **1.900** | **1.900** | **1.800** | **5.600** |
 
 ### Contributions of the planner and executor
 
@@ -136,7 +145,29 @@ After an exam, the speaker wanted comfort from her mother. When the conversation
 | --- | :---: | :---: | :---: | :---: | :---: |
 | Qwen3.5-9B | 4.480 | 4.308 | 4.738 | Reference |  |
 | Planner + backbone | 4.870 | 5.008 | 4.663 | +0.390 | [0.153, 0.597] |
-| **DepRePlan (Ours)** | **5.275** | **5.292** | **5.250** | +0.405 | [0.193, 0.629] |
+| **AIDA (Ours)** | **5.275** | **5.292** | **5.250** | +0.405 | [0.193, 0.629] |
+
+### Replies with assessment information
+
+**Table VII. Replies to user feedback in 120 DepGuide scenarios.** AIDA and its Qwen3.5-9B backbone receive the same synthetic PHQ-8 item scores. Within each pair, the simulated user expresses the same feedback intent in response to each system's proposal. Each metric is scored out of 2. The primary outcome is feedback adaptation. Paired differences are averaged across both presentation orders, with 95% confidence intervals from a source group bootstrap.
+
+| Metric ↑ | Qwen3.5-9B | AIDA (Ours) | Paired gain | 95% CI |
+| --- | :---: | :---: | :---: | :---: |
+| Feedback adaptation | 1.550 | 1.646 | +0.096 | [−0.033, 0.227] |
+| Action feasibility | 1.475 | 1.746 | **+0.271** | **[0.157, 0.387]** |
+| Response focus | 1.246 | 1.854 | **+0.608** | **[0.521, 0.697]** |
+
+### Sensitivity to source composition
+
+**Table VIII. Paired gains after excluding source families.** Each row excludes every test case in a source group represented by the named family. On the same retained cases, exchange gain compares AIDA with direct backbone generation (out of 6), and revision gain compares revised and original plans under fixed feedback (out of 4). The MIRROR/ESConv family includes FailedESConv.
+
+| Excluded family | Retained cases | Retained groups | Exchange gain | Revision gain |
+| --- | :---: | :---: | :---: | :---: |
+| CPsDD | 130 | 114 | +0.708 | +0.335 |
+| CACTUS | 150 | 134 | +0.827 | +0.380 |
+| DESC | 150 | 141 | +0.760 | +0.263 |
+| MIRROR/ESConv | 160 | 150 | +0.856 | +0.316 |
+| Psy-Insight/PsyDTCorpus | 190 | 171 | +0.811 | +0.342 |
 
 ## Run a dialogue
 
