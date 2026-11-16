@@ -1,6 +1,6 @@
 # AIDA
 
-*From Multimodal Depression Assessment to Feedback-Guided Intervention*
+*AIDA: Unifying Multimodal Depression Assessment And Intervention Through Closed-Loop Planning*
 
 **Assessment-Informed Dialogue Adaptation (AIDA)** connects multimodal depression assessment to a concrete intervention plan. When a user explains why a proposed step is difficult, the planner revises that step within the selected CBT technique.
 
