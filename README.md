@@ -35,7 +35,7 @@ Multimodal interviews can be used to estimate depressive symptom severity, yet t
 | **AIDA (Ours)** | **1.810** | **1.680** | 1.785 | **5.275** | — |
 
 <p align="center">
-  <a href="assets/intervention-profiles.png"><img src="assets/intervention-profiles.png" width="1000" alt="Eight systems compared by mean two-reply score. The right panel compares AIDA, Qwen3.5-9B, DeepSeek-V4-Flash, and CAMEL-LLAMA3 across five feedback intents."></a>
+  <a href="assets/figure-4-results.png"><img src="assets/figure-4-results.png" width="1000" alt="Eight systems compared by mean two-reply score. The right panel compares AIDA, Qwen3.5-9B, DeepSeek-V4-Flash, and CAMEL-LLAMA3 across five feedback intents."></a>
 </p>
 
 *Figure 4. Intervention quality on 200 DepGuide test scenarios, scored by GPT-6 Luna. Left, mean totals out of 6 combine goal fit, action feasibility, and feedback adaptation, each out of 2. Right, mean feedback adaptation out of 2 across five prespecified feedback intents for AIDA, Qwen3.5-9B, DeepSeek-V4-Flash, and CAMEL-LLAMA3. Higher scores indicate better performance.*
@@ -62,7 +62,7 @@ Multimodal interviews can be used to estimate depressive symptom severity, yet t
 **Returning to drawing.** The user misses drawing, and the assessment points to low energy. AIDA suggests a quick sketch. When the user says a blank page puts them off, AIDA suggests picking up an unfinished drawing. The user then worries about having to finish the whole bird, so AIDA suggests adding one feather and stopping there.
 
 <p align="center">
-  <a href="assets/motivation.png"><img src="assets/motivation.png" width="640" alt="A teal arrow leads from the low-energy assessment to an initial plan. Gray arrows link model replies and user feedback, and an orange arrow carries the revised plan into the next turn. In the example, the model suggests returning to an unfinished bird and stopping after one feather."></a>
+  <a href="assets/figure-1-motivation.png"><img src="assets/figure-1-motivation.png" width="640" alt="A teal arrow leads from the low-energy assessment to an initial plan. Gray arrows link model replies and user feedback, and an orange arrow carries the revised plan into the next turn. In the example, the model suggests returning to an unfinished bird and stopping after one feather."></a>
 </p>
 
 *Figure 1. AIDA extends standard dialogue, shown in gray, by introducing assessment-guided initial planning in teal and feedback-driven plan revision in orange. Assessment guides a manageable first step, while successive feedback refines where to start and where to stop.*
@@ -70,7 +70,7 @@ Multimodal interviews can be used to estimate depressive symptom severity, yet t
 **The assessment informs the planner. The user's feedback informs the revision.** The planner can take a PHQ-8 total alongside the opening concern, select one of seven CBT techniques, and write an initial plan. The executor uses the technique, plan, and dialogue history to generate the first reply. After the user responds, the planner receives its previous plan and the updated history. In Figure 2, the request for one detail changes the next question while the technique remains Reality Testing.
 
 <p align="center">
-  <a href="assets/depreplan-framework.png"><img src="assets/depreplan-framework.png" width="1000" alt="Video, audio and text inform an optional assessment. A planner selects a CBT technique and plans the reply. User feedback leads it to revise the plan before the dialogue model responds again."></a>
+  <a href="assets/figure-2-framework.png"><img src="assets/figure-2-framework.png" width="1000" alt="Video, audio and text inform an optional assessment. A planner selects a CBT technique and plans the reply. User feedback leads it to revise the plan before the dialogue model responds again."></a>
 </p>
 
 *Figure 2. Overview of AIDA. In panel a, the PHQ-8 score from multimodal assessment enters the planner alongside the user's concern to guide CBT technique selection and initial planning. The dialogue model generates a reply from the plan, and user feedback returns to the planner for revision. Panel b illustrates revision within Reality Testing, narrowing incident recall to one concrete detail.*
@@ -80,7 +80,7 @@ Multimodal interviews can be used to estimate depressive symptom severity, yet t
 DepGuide is a bilingual benchmark built around a decision trajectory. Each scenario records the opening concern, the selected technique, the initial plan and reply, feedback on that reply, and the revised plan and reply. A trajectory supplies three planning targets and two response targets.
 
 <p align="center">
-  <a href="assets/depguide-trajectory.png"><img src="assets/depguide-trajectory.png" width="1000" alt="A worked DepGuide trajectory links the opening, initial plan and first reply to the user’s difficulty choosing an activity, a revised plan, and the next reply."></a>
+  <a href="assets/figure-3-depguide.png"><img src="assets/figure-3-depguide.png" width="1000" alt="A worked DepGuide trajectory links the opening, initial plan and first reply to the user’s difficulty choosing an activity, a revised plan, and the next reply."></a>
 </p>
 
 *Figure 3. Construction of a DepGuide decision trajectory illustrated by a development example. The source context grounds the initial plan and first reply. When the user indicates that choosing between two activities is itself demanding, the revised plan preserves the intervention goal and replaces the choice with one optional action. The next reply makes this action concrete by suggesting looking outside without getting up, while allowing the user to pause. Trajectory review checks consistency with the source and responsiveness to the stated feedback.*
@@ -115,12 +115,10 @@ After excluding the seven scenarios flagged by either annotator, both main paire
 After an exam, the speaker wanted comfort from her mother. When the conversation turns to sending her a text, the user says she could do that but does not know how to begin. AIDA uses the speaker's own phrasing to suggest an opening line.
 
 <p align="center">
-  <a href="assets/dialogue-case.png"><img src="assets/dialogue-case.png" width="1000" alt="A speaker wants comfort after an exam. When she says she could send a text but does not know how to begin, AIDA suggests an opening line using her words."></a>
+  <a href="assets/figure-5-dialogue.png"><img src="assets/figure-5-dialogue.png" width="1000" alt="A speaker wants comfort after an exam. When she says she could send a text but does not know how to begin, AIDA suggests an opening line using her words."></a>
 </p>
 
 *Figure 5. An AIDA dialogue about seeking comfort after an exam. Video, audio, and the opening concern are shown with a PHQ-8 estimate of 14.6 out of 24. Across two feedback turns, AIDA helps the user distinguish observations from interpretations and identify a concrete way to ask her mother for comfort.*
-
-The repository edition omits identifiable video frames in Figures 2 and 5.
 
 ## What changes after feedback?
 
@@ -137,7 +135,7 @@ The repository edition omits identifiable video frames in Figures 2 and 5.
 | Total ↑ | 3.1025 | **3.4350** | +0.3325 | [0.147, 0.522] |
 
 <p align="center">
-  <a href="assets/paired-score-differences.png"><img src="assets/paired-score-differences.png" width="585" alt="Distribution of 200 paired score differences for the same user feedback. The revised plan scores higher in 90 cases, equally in 50 and lower in 60."></a>
+  <a href="assets/figure-6-revision.png"><img src="assets/figure-6-revision.png" width="585" alt="Distribution of 200 paired score differences for the same user feedback. The revised plan scores higher in 90 cases, equally in 50 and lower in 60."></a>
 </p>
 
 *Figure 6. Paired effects of plan revision on 200 DepGuide test scenarios. The horizontal axis shows revised-plan minus original-plan reply scores, and the vertical axis counts scenarios. Scores combine feedback fit and action feasibility for a total out of 4 and are averaged over both presentation orders. History, feedback, CBT technique, and dialogue model are held fixed.*
